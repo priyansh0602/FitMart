@@ -191,33 +191,30 @@ export default function Profile() {
     setSaving(true);
 
     try {
-      // 1. Upload to Cloudinary
+      // Upload photo via backend endpoint
       const formData = new FormData();
-      formData.append("file", file);
-      formData.append("upload_preset", import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
+      formData.append("photo", file);
 
-      const uploadRes = await fetch(
-        `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
-        { method: "POST", body: formData }
-      );
-
-      if (!uploadRes.ok) throw new Error("Upload to Cloudinary failed");
-      const uploadData = await uploadRes.json();
-      const cloudinaryURL = uploadData.secure_url;
-
-      // 2. Update user profile in database with photoURL
       const headers = await getAuthHeaders();
-      const profileRes = await fetch(`${API}/api/user/profile/${user.uid}`, {
-        method: "PUT",
-        headers,
+      const res = await fetch(`${API}/api/user/upload-photo/${user.uid}`, {
+        method: "POST",
+        headers: {
+          "Authorization": headers.Authorization,
+        },
         credentials: "include",
-        body: JSON.stringify({ photoURL: cloudinaryURL }),
+        body: formData,
       });
 
-      if (!profileRes.ok) throw new Error("Failed to save photo URL");
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to upload photo");
+      }
 
-      // 3. Update local state
-      setPhotoURL(cloudinaryURL);
+      const data = await res.json();
+      const photoURL = data.photoURL;
+
+      // Update local state with returned photo URL
+      setPhotoURL(photoURL);
       setToast("Profile photo updated successfully");
     } catch (err) {
       setError(err.message);
