@@ -266,7 +266,7 @@ export default function Authentication() {
           FitMart
         </button>
         <a
-          href="https://github.com/parthnarkar/FitMart"
+          href="https://github.com/parthbuilds-community/FitMart"
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-2 text-sm text-white border border-stone-600 px-3 py-1 rounded-md hover:border-white transition"
